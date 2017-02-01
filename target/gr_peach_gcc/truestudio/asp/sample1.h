@@ -76,6 +76,10 @@
 #define LOOP_REF		ULONG_C(1000000)	/* 速度計測用のループ回数 */
 #endif /* LOOP_REF */
 
+#ifndef QUE_SIZE
+#define QUE_SIZE		5			/* データキューのサイズ */
+#endif /* QUE_SIZE */
+
 /*
  *  関数のプロトタイプ宣言
  */

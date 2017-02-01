@@ -145,6 +145,7 @@ void task(intptr_t exinf)
 	volatile ulong_t	i;
 	int_t		n = 0;
 	int_t		tskno = (int_t) exinf;
+	int_t		queno;
 	const char	*graph[] = { "|", "  +", "    *" };
 	char		c;
 
@@ -153,8 +154,22 @@ void task(intptr_t exinf)
 		syslog(LOG_NOTICE, "task%d is running (%03d).   %s",
 										tskno, ++n, graph[tskno-1]);
 		for (i = 0; i < task_loop; i++);
-		c = message[tskno-1];
-		message[tskno-1] = 0;
+		switch( tskno){
+		case TASK1:
+			queno = QUE1;
+			break;
+		case TASK2:
+			queno = QUE2;
+			break;
+		case TASK3:
+			queno = QUE3;
+			break;
+		default:
+			queno = QUE1;
+			break;
+		}
+		prcv_dtq(queno, (intptr_t*)&c);
+
 		switch (c) {
 		case 'e':
 			syslog(LOG_INFO, "#%d#ext_tsk()", tskno);
@@ -285,6 +300,7 @@ void main_task(intptr_t exinf)
 {
 	char	c;
 	ID		tskid = TASK1;
+	ID		queid = QUE1;
 	int_t	tskno = 1;
 	ER_UINT	ercd;
 	PRI		tskpri;
@@ -386,19 +402,22 @@ void main_task(intptr_t exinf)
 		case 'Y':
 		case 'z':
 		case 'Z':
-			message[tskno-1] = c;
+			SVC_PERROR(snd_dtq(queid, c));
 			break;
 		case '1':
 			tskno = 1;
 			tskid = TASK1;
+			queid = QUE1;
 			break;
 		case '2':
 			tskno = 2;
 			tskid = TASK2;
+			queid = QUE2;
 			break;
 		case '3':
 			tskno = 3;
 			tskid = TASK3;
+			queid = QUE3;
 			break;
 		case 'a':
 			syslog(LOG_INFO, "#act_tsk(%d)", tskno);
